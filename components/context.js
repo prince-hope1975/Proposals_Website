@@ -2,13 +2,12 @@ import React, { useContext, useState } from "react";
 
 const AppContext = React.createContext();
 export const AppProvider = ({ children }) => {
-const [state, setState] = useState(null);
+const [propsObj, setPropsObj] = useState(null);
 return (
 <AppContext.Provider
 value={{
-    
-state,
-setState, 
+propsObj,
+setPropsObj,
 }} 
 > 
 {children}

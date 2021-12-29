@@ -3,11 +3,13 @@ import Image from 'next/image'
 import styles from '../styles/Home.module.css'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useGlobalContext } from '../components/context'
 export default function Home() {
-  const [propsObj, setPropsObj] = useState(null)
+  const {propsObj, setPropsObj}= useGlobalContext()
+  
   useEffect(()=>{
     let storage = window.localStorage.getItem("proposals")
-     if(!storage){
+     if(storage){
       localStorage.setItem("proposals",JSON.stringify(Obj))
       storage = localStorage.getItem("proposals")
     }
@@ -73,6 +75,7 @@ const Obj = [
   {
     name: "prince",
     desc: "Welcome to the wild wild west",
+    id : "123"
   },
   {
     name: "prince",
