@@ -4,6 +4,7 @@ import styles from '../styles/Home.module.css'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useGlobalContext } from '../components/context'
+import { AiOutlineAlignRight } from 'react-icons/ai'
 export default function Home() {
   const {propsObj, setPropsObj}= useGlobalContext()
   
@@ -38,18 +39,18 @@ export default function Home() {
         </p>
 
         <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h2>Documentation &rarr;</h2>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
 
-          {propsObj && propsObj.map(({name, desc}, key)=>{
-              return (<a key={key} href="https://nextjs.org/docs" className={styles.card}>
-                 <h2>{name} &rarr;</h2>
-                 <p>
-                  {desc}
-                 </p>
-               </a>);
+          {propsObj && propsObj.map(({name, desc, id}, key)=>{
+              return (
+                <details className={styles.card} key={key}>
+                  <summary>
+                    <div className="relative">{name}</div>
+                    {"  "}#{id}
+                    <Link href={`/${id}`}> &rarr;</Link>
+                  </summary>
+                  <Link href={`/${id}`}><a className='cursor-pointer'>{desc.slice(0, 150)}...</a></Link>
+                </details>
+              );
           })}
 
         </div>
@@ -75,14 +76,16 @@ const Obj = [
   {
     name: "prince",
     desc: "Welcome to the wild wild west",
-    id : "123"
+    id: "1",
+  },
+  {
+    name: "prince",
+    desc: "Welcome to the wild wild west  Lorem, ipsum dolor sit amet consectetur adipisicing elit. Placeat rem saepe libero. Nostrum numquam enim non. Consequuntur, quos odit iusto, temporibus aliquam quisquam enim ea numquam fugiat veniam dolorum commodi",
+    id: "2",
   },
   {
     name: "prince",
     desc: "Welcome to the wild wild west",
-  },
-  {
-    name: "prince",
-    desc: "Welcome to the wild wild west",
+    id: "3",
   },
 ];
