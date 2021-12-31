@@ -10,7 +10,6 @@ import Link from "next/link";
 
 const  Post = () =>{
     const [loading, setLoading] = useState(null)
-    const [item, setItem] = useState(null)
     const { propsObj, setPropsObj } = useGlobalContext();
     const router = useRouter()
     const {pid} = router.query
@@ -27,8 +26,9 @@ const  Post = () =>{
      }
    
   useEffect(()=>{
-   
-    let storage = window.localStorage.getItem("proposals")
+
+    let storage = 
+    localStorage.getItem("proposals")
      if(!storage){
       localStorage.setItem("proposals",JSON.stringify(Obj))
       storage = localStorage.getItem("proposals")
@@ -48,24 +48,6 @@ return (
       <link rel="icon" href="/favicon.ico" />
     </Head>
     <main className={styles.main}>
-      {/* {!(loading && propsObj  && item) ? (
-        <div className="bg-indigo-500 text-gray-50 text-2xl flex align-center transition-all delay-150">
-          <AiOutlineLoading3Quarters className="animate-spin text-gray-50" />
-          Loading...
-        </div>
-      ) : (
-        <>
-          <Vote
-            {...item[0]}
-          >
-            <Link href="/">
-              <a className="text-3xl animate-bounce absolute left-2 top-3 cursor-pointer">
-                &larr;
-              </a>
-            </Link>
-          </Vote>
-        </>
-      )} */}
       {propsObj?.filter(({id})=>{
        return id == pid && id;
       }).map((item, index)=>{

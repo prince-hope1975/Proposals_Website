@@ -3,6 +3,7 @@ import {useGlobalContext} from "./context"
 import WalletConnect from "@walletconnect/client";
 import QRCodeModal from "algorand-walletconnect-qrcode-modal"
 import styles from "../styles/header.module.css"
+import Link from "next/link";
 const Header = () =>{
   const { isConnected, setModalOpen, isModalOpen, setConnected } =
     useGlobalContext();
@@ -155,7 +156,7 @@ setModalOpen(false);
             styles.modal
           } ${isModalOpen ? styles.modalClosed : ""}`}
         ></div>
-        Choice coin
+        <Link href="/"><a className="text-2xl hover:text-gray-50">Choice Proposals</a></Link>
         <div className={`${styles.buttons} `}>
           {!isConnected ? (
             <div onClick={() => setModalOpen(!isModalOpen)}>Connect</div>

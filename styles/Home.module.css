@@ -1,8 +1,10 @@
 .container {
   padding: 0 2rem;
+  position: relative;
 }
 
 .main {
+  
   min-height: 100vh;
   padding: 4rem 0;
   flex: 1;
@@ -81,8 +83,9 @@
   text-decoration: none;
   border: 1px solid #eaeaea;
   border-radius: 10px;
-  transition: color 0.15s ease, border-color 0.15s ease;
-  max-width: 300px;
+  transition: color 0.15s ease,
+  border-color 0.15s ease;
+  width: clamp(80px, 70%, 450px);
 }
 
 .card:hover,
@@ -91,11 +94,25 @@
   color: #0070f3;
   border-color: #0070f3;
 }
-
-.card h2 {
-  margin: 0 0 1rem 0;
-  font-size: 1.5rem;
+.card details{
+  position: relative;
 }
+.card summary  {
+  margin: 0 0 1rem 0;
+  font-size: 1.9rem;
+
+  }
+  .card .text{
+    position: relative;
+  }
+  .card div{
+    position: relative;
+    display: inline;
+    font: 1rem;
+    text-transform: uppercase;
+  }
+  
+
 
 .card p {
   margin: 0;
@@ -114,3 +131,4 @@
     flex-direction: column;
   }
 }
+
