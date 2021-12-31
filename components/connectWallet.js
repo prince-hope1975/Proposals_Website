@@ -1,332 +1,520 @@
-// import algosdk from "algosdk";
-// import { ASSET_ID } from "./constants";
-// import { useEffect, useState } from "react";
-// import MyAlgoConnect from "@randlabs/myalgo-connect";
-// import { useWindowSize } from "@react-hook/window-size";
-// import { CopyToClipboard } from "react-copy-to-clipboard";
-// import WalletConnect from "@walletconnect/client";
-// import QRCodeModal from "algorand-walletconnect-qrcode-modal";
+import $ from "jquery";
+import algosdk from "algosdk";
+import { useState } from "react";
+import "./styles/electionlist.css";
+import WalletConnect from "@walletconnect/client";
+import MyAlgoConnect from "@randlabs/myalgo-connect";
+import { formatJsonRpcRequest } from "@json-rpc-tools/utils";
+import QRCodeModal from "algorand-walletconnect-qrcode-modal";
+import { ASSET_ID, ELECTION_ID, URL, ADDRESS_1, ADDRESS_2 } from "./constants";
 
-const TopNavigationBar = ({ darkTheme, NavLink }) => {
+const ElectionList = () => {
 
-  // const isWalletConnected =
-  //   localStorage.getItem("wallet-type") === null ? false : true;
-  const LogOut = () => {
-    localStorage.removeItem("address");
-    localStorage.removeItem("addresses");
-    localStorage.removeItem("wallet-type");
-    localStorage.removeItem("walletconnect");
-    window.location.reload();
-    console.log("data");
-  };
+  const [address1, setAddress1] = useState(0);
+  const [address2, setAddress2] = useState(0);
 
-  const setMode = () => {
-    if (!darkTheme) {
-      localStorage.setItem("mode", "dark");
-      // dispatch({ type: "dark_mode" });
-    } else {
-      localStorage.setItem("mode", "light");
-      // dispatch({ type: "light_mode" });
+  const algodClient = new algosdk.Algodv2(
+    {
+      "X-API-Key": "",
+    },
+    "https://testnet-algorand.api.purestake.io/ps2",
+    ""
+  );
+
+  const walletType = localStorage.getItem("wallet-type");
+  const isThereAddress = localStorage.getItem("address");
+
+  const myAlgoConnect = async (voteData) => {
+    const myAlgoWallet = new MyAlgoConnect();
+
+    try {
+      const accounts = await myAlgoWallet.connect({
+        shouldSelectOneAccount: true,
+      });
+      const address = !!isThereAddress ? isThereAddress : accounts[0].address;
+
+      const myAccountInfo = await algodClient
+        .accountInformation(
+          !!isThereAddress ? isThereAddress : accounts[0].address
+        )
+        .do();
+
+      // get balance of the voter
+      const balance = myAccountInfo.assets
+        ? myAccountInfo.assets.find(
+            (element) => element["asset-id"] === ASSET_ID
+          ).amount / 100
+        : 0;
+
+      // check if the voter address has Choice
+      // const containsChoice = myAccountInfo.assets
+      //   ? myAccountInfo.assets.some(
+      //       (element) => element["asset-id"] === ASSET_ID
+      //     )
+      //   : false;
+
+      // // if the address has no ASAs
+      // if (myAccountInfo.assets.length === 0) {
+      //   dispatch({
+      //     type: "alert_modal",
+      //     alertContent:
+      //       "You need to opt-in to Choice Coin in your Algorand Wallet.",
+      //   });
+      //   return;
+      // }
+
+      // if (!containsChoice) {
+      //   dispatch({
+      //     type: "alert_modal",
+      //     alertContent:
+      //       "You need to opt-in to Choice Coin in your Algorand Wallet.",
+      //   });
+      //   return;
+      // }
+
+      // if (voteData.amount > balance) {
+      //   dispatch({
+      //     type: "alert_modal",
+      //     alertContent:
+      //       "You do not have sufficient balance to make this transaction.",
+      //   });
+      //   return;
+      // }
+
+      const suggestedParams = await algodClient.getTransactionParams().do();
+      const amountToSend = voteData.amount * 100;
+
+      const txn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
+        from: address,
+        to: voteData.address,
+        amount: amountToSend,
+        assetIndex: ASSET_ID,
+        suggestedParams,
+      });
+
+      const signedTxn = await myAlgoWallet.signTransaction(txn.toByte());
+      await algodClient.sendRawTransaction(signedTxn.blob).do();
+
+      // alert success
+      dispatch({
+        type: "alert_modal",
+        alertContent: "Your vote has been recorded.",
+      });
+      setTimeout(() => window.location.reload(), 1500);
+    } catch (error) {
+      if (error.message === "Can not open popup window - blocked") {
+        dispatch({
+          type: "alert_modal",
+          alertContent:
+            "Pop Up windows blocked by your browser. Enable pop ups to continue.",
+        });
+      } else {
+        dispatch({
+          type: "alert_modal",
+          alertContent: "An error occured the during transaction process",
+        });
+      }
     }
   };
 
-  // const [balance, setBalance] = useState([]);
+  const algoSignerConnect = async (voteData) => {
+    try {
+      if (typeof window.AlgoSigner === "undefined") {
+        window.open(
+          "https://chrome.google.com/webstore/detail/algosigner/kmmolakhbgdlpkjkcjkebenjheonagdm",
+          "_blank"
+        );
+      } else {
+        await window.AlgoSigner.connect({
+          ledger: "TestNet",
+        });
+        const accounts = await window.AlgoSigner.accounts({
+          ledger: "TestNet",
+        });
 
-  // const algodClient = new algosdk.Algodv2(
-  //   {
-  //     "X-API-Key": "Xy8NsXxfJg2cQ2YQ4pax6aLrTcj55jZ9mbsNCM30 ",
-  //   },
-  //   "https://testnet-algorand.api.purestake.io/ps2",
-  //   ""
-  // );
+        const address = !!isThereAddress ? isThereAddress : accounts[0].address;
 
-  // const walletAddress = localStorage.getItem("address");
-  // const addresses = localStorage.getItem("addresses")?.split(",");
+        const myAccountInfo = await algodClient
+          .accountInformation(
+            !!isThereAddress ? isThereAddress : accounts[0].address
+          )
+          .do();
 
-  // let addrArr = [];
+        // get balance of the voter
+        const balance = myAccountInfo.assets
+          ? myAccountInfo.assets.find(
+              (element) => element["asset-id"] === ASSET_ID
+            ).amount / 100
+          : 0;
 
-  // useEffect(() => {
-  //   addresses?.forEach(async (item) => {
-  //     const myAccountInfo = await algodClient.accountInformation(item).do();
-  //     const bal =
-  //       myAccountInfo.assets.find((element) => element["asset-id"] === ASSET_ID)
-  //         ?.amount / 100;
+        // check if the voter address has Choice
+        const containsChoice = myAccountInfo.assets
+          ? myAccountInfo.assets.some(
+              (element) => element["asset-id"] === ASSET_ID
+            )
+          : false;
 
-  //     addrArr.push({ balance: !!bal ? bal : 0, address: item });
+        // if the address has no ASAs
+        if (myAccountInfo.assets.length === 0) {
+          dispatch({
+            type: "alert_modal",
+            alertContent:
+              "You need to opt-in to Choice Coin in your Algorand Wallet.",
+          });
+          return;
+        }
 
-  //     if (addrArr?.length === addresses?.length) {
-  //       dispatch({
-  //         type: "setAlgoAddress",
-  //         addressIndex: 0,
-  //         addr: addrArr[0]?.address,
-  //       });
-  //       setBalance(addrArr);
-  //     }
-  //   });
+        if (!containsChoice) {
+          dispatch({
+            type: "alert_modal",
+            alertContent:
+              "You need to opt-in to Choice Coin in your Algorand Wallet.",
+          });
+          return;
+        }
 
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []);
+        if (voteData.amount > balance) {
+          dispatch({
+            type: "alert_modal",
+            alertContent:
+              "You do not have sufficient balance to make this transaction.",
+          });
+          return;
+        }
 
-  // const myAlgoConnect = async () => {
-  //   const myAlgoWallet = new MyAlgoConnect({ shouldSelectOneAccount: false });
+        const suggestedParams = await algodClient.getTransactionParams().do();
+        const amountToSend = voteData.amount * 100;
 
-  //   try {
-  //     const accounts = await myAlgoWallet.connect({
-  //       shouldSelectOneAccount: true,
-  //     });
+        const txn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
+          from: address,
+          to: voteData.address,
+          amount: amountToSend,
+          assetIndex: ASSET_ID,
+          suggestedParams,
+        });
 
-  //     const addresses = accounts.map((item) => item?.address);
-  //     const address = accounts[0].address;
+        const signedTxn = await window.AlgoSigner.signTxn([
+          { txn: window.AlgoSigner.encoding.msgpackToBase64(txn.toByte()) },
+        ]);
+        await algodClient
+          .sendRawTransaction(
+            window.AlgoSigner.encoding.base64ToMsgpack(signedTxn[0].blob)
+          )
+          .do();
 
-  //     // close modal.
-  //     localStorage.setItem("wallet-type", "my-algo");
-  //     localStorage.setItem("address", address);
-  //     localStorage.setItem("addresses", addresses);
+        // alert success
+        dispatch({
+          type: "alert_modal",
+          alertContent: "Your vote has been recorded.",
+        });
+        setTimeout(() => window.location.reload(), 1500);
+      }
+    } catch (error) {
+      if (error.message === "Can not open popup window - blocked") {
+        dispatch({
+          type: "alert_modal",
+          alertContent:
+            "Pop Up windows blocked by your browser. Enable pop ups to continue.",
+        });
+      } else {
+        dispatch({
+          type: "alert_modal",
+          alertContent: "An error occured the during transaction process",
+        });
+      }
+    }
+  };
 
-  //     window.location.reload();
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // };
+  const algoMobileConnect = async (voteData) => {
+    const connector = new WalletConnect({
+      bridge: "https://bridge.walletconnect.org",
+      qrcodeModal: QRCodeModal,
+    });
 
-  // const connectWallet = () => {
-  //   const connector = new WalletConnect({
-  //     bridge: "https://bridge.walletconnect.org",
-  //     qrcodeModal: QRCodeModal,
-  //   });
+    try {
+      const address = !!isThereAddress ? isThereAddress : "";
 
-  //   if (!connector.connected) {
-  //     connector.createSession();
-  //   }
+      const myAccountInfo = await algodClient.accountInformation(address).do();
 
-  //   connector.on("connect", (error, payload) => {
-  //     if (error) {
-  //       throw error;
-  //     }
+      const balance = myAccountInfo.assets
+        ? myAccountInfo.assets.find(
+            (element) => element["asset-id"] === ASSET_ID
+          ).amount / 100
+        : 0;
 
-  //     const { accounts } = payload.params[0];
+      const containsChoice = myAccountInfo.assets
+        ? myAccountInfo.assets.some(
+            (element) => element["asset-id"] === ASSET_ID
+          )
+        : false;
 
-  //     const addresses = accounts.map((item) => item);
-  //     const address = accounts[0];
+      if (myAccountInfo.assets.length === 0) {
+        alert("You need to opt-in to Choice Coin in your Algorand Wallet.");
+        return;
+      }
 
-  //     localStorage.setItem("wallet-type", "walletconnect");
-  //     localStorage.setItem("address", address);
-  //     localStorage.setItem("addresses", addresses);
+      if (!containsChoice) {
+        alert("You need to opt-in to Choice Coin in your Algorand Wallet.");
+        return;
+      }
 
-  //     window.location.reload();
-  //   });
+      if (voteData.amount > balance) {
+        alert("You do not have sufficient balance to make this transaction.");
+        return;
+      }
 
-  //   connector.on("session_update", (error, payload) => {
-  //     if (error) {
-  //       throw error;
-  //     }
+      const suggestedParams = await algodClient.getTransactionParams().do();
+      const amountToSend = voteData.amount * 100;
 
-  //     const { accounts } = payload.params[0];
+      const txn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
+        from: address,
+        to: voteData.address,
+        amount: amountToSend,
+        assetIndex: ASSET_ID,
+        suggestedParams,
+      });
 
-  //     const addresses = accounts.map((item) => item);
-  //     const address = accounts[0];
+      const txnsToSign = [
+        {
+          txn: Buffer.from(algosdk.encodeUnsignedTransaction(txn)).toString(
+            "base64"
+          ),
+          message: "Transaction using Mobile Wallet",
+        },
+      ];
 
-  //     localStorage.setItem("wallet-type", "walletconnect");
-  //     localStorage.setItem("address", address);
-  //     localStorage.setItem("addresses", addresses);
+      const requestParams = [txnsToSign];
 
-  //     window.location.reload();
-  //   });
+      const request = formatJsonRpcRequest("algo_signTxn", requestParams);
+      const result = await connector.sendCustomRequest(request);
 
-  //   connector.on("disconnect", (error, payload) => {
-  //     if (error) {
-  //       console.log(error);
-  //     }
-  //   });
-  // };
+      const decodedResult = result.map((element) => {
+        return element ? new Uint8Array(Buffer.from(element, "base64")) : null;
+      });
 
-  // const algoSignerConnect = async () => {
-  //   try {
-  //     if (typeof window.AlgoSigner === "undefined") {
-  //       window.open(
-  //         "https://chrome.google.com/webstore/detail/algosigner/kmmolakhbgdlpkjkcjkebenjheonagdm",
-  //         "_blank"
-  //       );
-  //     } else {
-  //       await window.AlgoSigner.connect({
-  //         ledger: "TestNet",
-  //       });
-  //       const accounts = await window.AlgoSigner.accounts({
-  //         ledger: "TestNet",
-  //       });
+      console.log(decodedResult);
 
-  //       const addresses = accounts.map((item) => item?.address);
-  //       const address = accounts[0].address;
+      // alert success
+      dispatch({
+        type: "alert_modal",
+        alertContent: "Your vote has been recorded.",
+      });
+      setTimeout(() => window.location.reload(), 1500);
+    } catch (error) {
+      if (error.message === "Can not open popup window - blocked") {
+        dispatch({
+          type: "alert_modal",
+          alertContent:
+            "Pop Up windows blocked by your browser. Enable pop ups to continue.",
+        });
+      } else {
+        dispatch({
+          type: "alert_modal",
+          alertContent: "An error occured the during transaction process",
+        });
+      }
+    }
+  };
 
-  //       // close modal.
-  //       localStorage.setItem("wallet-type", "algosigner");
-  //       localStorage.setItem("address", address);
-  //       localStorage.setItem("addresses", addresses);
+  const placeVote = (address, amount, election) => {
+    if (!address) {
+      dispatch({
+        type: "alert_modal",
+        alertContent: "Select an option to vote!!",
+      });
+      return;
+    }
 
-  //       window.location.reload();
-  //     }
-  //   } catch (error) {
-  //     dispatch({
-  //       type: "alert_modal",
-  //       alertContent: "AlgoSigner not set up yet!",
-  //     });
-  //   }
-  // };
+    if (walletType === "my-algo") {
+      myAlgoConnect({ address, amount, election });
+    } else if (walletType === "algosigner") {
+      algoSignerConnect({ address, amount, election });
+    } else if (walletType === "walletconnect") {
+      algoMobileConnect({ address, amount, election });
+    }
+  };
+
+  if (isLoading)
+    return (
+      <div className="ptt_elt">
+        <div className="ptt_elt_inn">
+          <div className="ptt_hd">
+            <p>Vote 0: Choice Coin Reserve Address Distribution</p>
+          </div>
+
+          <ul className="card_list">
+            <div
+              style={{
+                width: "100%",
+                height: "100%",
+                display: "flex",
+                alignItems: "center",
+                flexDirection: "column",
+                color: "var(--wht)",
+                textAlign: "center",
+                fontSize: "14px",
+                fontWeight: darkTheme ? 400 : 500,
+                textTransform: "uppercase",
+              }}
+            >
+              <p style={{ opacity: 0.8, margin: "30px 0px 20px" }}>Loading</p>
+              <BarLoader
+                color={darkTheme ? "#eee" : "#888"}
+                size={150}
+                speedMultiplier="0.5"
+              />
+            </div>
+          </ul>
+        </div>
+      </div>
+    );
+  if (error) return "An error has occurred: " + error.message;
 
   return (
-    <header className="">
-      
-      <div className="">
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            textTransform: "uppercase",
-          }}
-        >
-          Choice Coin
+    <div className="ptt_elt">
+      <div className="ptt_elt_inn">
+        <div className="ptt_hd">
+          <p>Vote 0: Reserve Address Distribution</p>
         </div>
 
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          {true? (
-            <>
-              <div className="">
-                <div className="">
-                  <div className="">
-                    <div className="">
-                      Choice
+        <ul className="card_list">
+          {election_data?.map((slug, index) => {
+            return (
+              <div className="card_cont" key={index}>
+                <div className="card_r1">
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      alignItems: "center",
+                    }}
+                  >
+                    <div className="card_elt_img">
+                      {slug.process_image ? (
+                        <img src={slug.process_image} alt="" />
+                      ) : (
+                        <i
+                          className="uil uil-asterisk"
+                          style={{ paddingLeft: "2px", paddingBottom: "2px" }}
+                        />
+                      )}
                     </div>
+                    <div className="card_elt_tit">{slug.title}</div>
+                  </div>
+                </div>
 
-                    {/* <CopyToClipboard text={balance[addressNum]?.address}>
-                      <div className="">
-                        <p>{balance[addressNum]?.address}</p>
-                        <i className=" uil-copy"></i>
+                <div className="card_elt_desc">{slug?.card_desc}</div>
+
+                <div className="voting_ends">
+                  Voting ends: December 29th, 2021, 5:00PM EST
+                </div>
+
+                <div className="results">
+                  <div className="resultsTit">Results</div>
+
+                  <div className="results_cont">
+                    <div className="optionButt">
+                      <div className="optionButtDets">
+                        <p>Option 1</p>
+                        <p>{address1} Choice</p>
                       </div>
-                    </CopyToClipboard> */}
+                      <div className="optRange">
+                        <div
+                          className="optRangeSlide optRangeSlide1"
+                          style={{
+                            width: `calc(100% * ${
+                              address1 / (address1 + address2)
+                            })`,
+                          }}
+                        ></div>
+                      </div>
+                    </div>
+                    <div className="optionButt">
+                      <div className="optionButtDets">
+                        <p>Option 2</p>
+                        <p>{address2} Choice</p>
+                      </div>
+                      <div className="optRange">
+                        <div
+                          className="optRangeSlide optRangeSlide2"
+                          style={{
+                            width: `calc(100% * ${
+                              address2 / (address1 + address2)
+                            })`,
+                          }}
+                        ></div>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                <div className="">
+                <div className="card_cand">
+                  <div className="card_cand_hd">
+                    <div className="amountToCommit">
+                      <p>Amount to commit:</p>
+                      <input
+                        type="number"
+                        min="0"
+                        placeholder="1"
+                        className="amtToCommitInp"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="vote_collap">
+                    <div className="card_cand_hd">Options</div>
+                    <ul className="vote_now_list">
+                      {slug?.candidates?.map((item, index) => {
+                        return (
+                          <li key={index}>
+                            <input
+                              type="radio"
+                              name="options"
+                              value={item.address}
+                            />
+
+                            <p>{item.name}</p>
+                          </li>
+                        );
+                      })}
+                    </ul>
+
+                    <div className="rec_vote_cont">
+                      <button
+                        className="record_vote"
+                        onClick={(e) => {
+                          var voteVal = $(e.target)
+                            .closest(".card_cand")
+                            .find(".vote_now_list");
+
+                          var amountToSend = $(e.target)
+                            .closest(".card_cand")
+                            .find(".amtToCommitInp")
+                            .val();
+
+                          var amt = !!amountToSend
+                            ? amountToSend
+                            : slug.choice_per_vote;
+
+                          placeVote(
+                            $("input[name=options]:checked", voteVal).val(),
+                            amt,
+                            slug
+                          );
+                        }}
+                      >
+                        Submit Vote <i className="uil uil-mailbox"></i>
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </>
-          ) : (
-            <div className="">
-              <div className="">
-                <button className="">
-                  <p>
-                    Connect Wallet
-                    <i
-                      className=" uil-angle-down"
-                      style={{ fontSize: "18px" }}
-                    />
-                  </p>
-                </button>
-              </div>
-
-              <div className="">
-                <div className="" onClick={myAlgoConnect}>
-                  <div className="">
-                    <img
-                      src="https://i.postimg.cc/76r9kXSr/My-Algo-Logo-4c21daa4.png"
-                      alt=""
-                    />
-                  </div>
-                  <p className="">My Algo Wallet</p>
-                </div>
-
-                <div
-                  className=""
-                  onClick={algoSignerConnect}
-                >
-                  <div className="">
-                    <img
-                      src="https://i.postimg.cc/L4JB4JwT/Algo-Signer-2ec35000.png"
-                      alt=""
-                    />
-                  </div>
-                  <p className="">
-                    {typeof window.AlgoSigner === undefined
-                      ? "Install AlgoSigner"
-                      : "AlgoSigner"}
-                  </p>
-                </div>
-
-                <div className="" onClick={connectWallet}>
-                  <div className="">
-                    <img
-                      src="https://i.postimg.cc/J7JZ4cFb/icon-37675b59-1.png"
-                      alt=""
-                    />
-                  </div>
-                  <p className="">
-                    Algorand Mobile Wallet
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+            );
+          })}
+        </ul>
       </div>
-
-      <div
-        style={{
-          width: "100%",
-          display: "flex",
-          fontSize: "12px",
-          fontWeight: "500",
-          wordSpacing: "1px",
-          alignItems: "center",
-          color: "var(--wht)",
-          padding: "0px 5vw",
-          letterSpacing: "0.5px",
-          textTransform: "uppercase",
-          background: "var(--background)",
-          height: "var(--sm-hd-height-half)",
-          justifyContent: "space-between",
-          borderTop: "1px solid var(--border-default)",
-        }}
-      >
-        <p style={{ opacity: "0.9" }}>
-          Amount committed to Governance:&nbsp;
-          {true&& <div>GetCommittedAmount</div>} Choice
-        </p>
-
-        {true && (
-          <ul className="">
-            <li>
-          
-            </li>
-
-            <li>
-            </li>
-
-            <li>
-         
-            </li>
-
-            <li >
-              M
-              {darkTheme ? (
-                <i className=" uil-brightness-low"></i>
-              ) : (
-                <i className=" uil-moon"></i>
-              )}
-              de
-            </li>
-            <li>Sign Out</li>
-          </ul>
-        )}
-      </div>
-    </header>
+    </div>
   );
 };
 
-export default TopNavigationBar;
+export default ElectionList;
