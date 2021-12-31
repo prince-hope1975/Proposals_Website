@@ -10,10 +10,11 @@ export default function Home() {
 
   useEffect(() => {
     let storage = localStorage.getItem("proposals");
-    if (storage) {
+    if (!storage) {
       localStorage.setItem("proposals", JSON.stringify(Obj));
       storage = localStorage.getItem("proposals");
     }
+    console.log("Change")
     setPropsObj(JSON.parse(storage));
   }, []);
 
@@ -38,16 +39,19 @@ export default function Home() {
 
         <div className={styles.grid}>
           {propsObj &&
-            propsObj.map(({ name, desc, id }, key) => {
+            propsObj?.map(({ name, desc, id }, key) => {
               return (
                 <details className={styles.card} key={key}>
-                  <summary>
+                  <summary className="overflow-hidden">
                     <div className="">{name}</div>
                     {"  "}#{id}
+                    <Link href={`/edit/${id}`}>Edit</Link>
                     <Link href={`/${id}`}>&rarr;</Link>
                   </summary>
                   <Link href={`/${id}`}>
-                    <a className="cursor-pointer">{desc.slice(0, 150)}...</a>
+                    <a className="cursor-pointer overflow-auto flex ">
+                      {desc.slice(0, 150)}...
+                    </a>
                   </Link>
                 </details>
               );

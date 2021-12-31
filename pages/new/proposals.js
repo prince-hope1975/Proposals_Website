@@ -11,7 +11,7 @@ export default function Proposals() {
 
   useEffect(() => {
     let storage = localStorage.getItem("proposals");
-    if (storage) {
+    if (!storage) {
       localStorage.setItem("proposals", JSON.stringify(Obj));
       storage = localStorage.getItem("proposals");
     }

@@ -2,10 +2,12 @@ import MarkdownIt from "markdown-it"
 import { useState,useRef } from "react/cjs/react.development"
 import { useGlobalContext } from "../context"
 import Link from "next/link"
+import { useRouter } from "next/router";
+
 const md = new MarkdownIt()
 
 const Proposal = ()=>{
-    const reference = useRef(null)
+  const router =useRouter()
     const { propsObj, markdown, setMarkdown, setPropsObj, title,setTitle } = useGlobalContext();
     const handleSubmit =(e)=>{
         e.preventDefault()
@@ -14,16 +16,24 @@ const Proposal = ()=>{
         setPropsObj([...propsObj, {name:title, desc:markdown, id:id, }])
         localStorage.setItem("proposals",JSON.stringify( [
           ...propsObj,
-          { name: title, desc: markdown, id: id },
+          { name: title, desc: markdown, id: Date.now() },
         ]));
-        (reference.current.click())
+        setPropsObj([...propsObj, {
+          name: title,
+          desc: markdown,
+          id: Date.now(),
+        }]);
+        alert("Successfully created Proposal \nYou can edit You Propsal in the Home or Proposals Page")
+        console.log(title, markdown)
+        router.push("/")
         
     }
     const handleChange = (e)=>{
         setMarkdown(e.target.value)
+        
     }
     const handleTitleChange =(e)=>{
-        console.log(e.target.value)
+        setTitle(e.target.value)
     }
     // const result = md.render("# Markdown it rules")
     return (
@@ -53,7 +63,7 @@ const Proposal = ()=>{
         />
 
       
-          <a  href="/"ref={reference}></a>
+
       
       </form>
     );
