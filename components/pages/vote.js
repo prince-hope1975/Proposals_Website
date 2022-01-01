@@ -48,6 +48,7 @@ const VoteComponent = ({name, desc, id, children}) => {
             <div className="text-bold text-xl mb-3">CAST VOTE:</div>
             <div className="flex justify-between pb-3">
 <div onClick={()=>setVote(0)} className={`yes ${(vote==0)?"bg-green-500":"bg-green-300"} px-3 py-1 rounded-sm cursor-pointer text-white`}>YES</div>
+<div><input className="outline-none border-2 bg-blue-200 p-1 border-gray-500" placeholder="Commit Choice" type="number"/></div>
  <div  onClick={()=>setVote(1)} className={`no ${vote==1?"bg-red-500":"bg-red-300"} px-3 py-1 rounded-sm cursor-pointer text-white`}>NO</div>
             </div>
           </div>
