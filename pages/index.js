@@ -75,7 +75,7 @@ export default function Home() {
                 >
                   <summary className="overflow-hidden">
                     <div className="">{name}</div>
-                    {"   "}#{`${id}`?.slice(4, 8)} {"    "}
+                    {"   "}#{`${id}`?.slice(8, 12)} {"    "}
                     <div className="grid grid-cols-2 ">
                       {address && address === userAddress && (
                         <>
@@ -93,7 +93,7 @@ export default function Home() {
                             }}
                             className=" hover:text-slate-900 cursor-pointer"
                           >
-                            <AiOutlineDelete />
+                            <AiOutlineDelete className="inline"/>
                           </div>
                         </>
                       )}

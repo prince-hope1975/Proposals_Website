@@ -9,7 +9,7 @@ import Header from "../../components/header";
 const Post = () => {
   const router = useRouter();
   const { pid } = router.query;
-  const { propsObj, markdown, setMarkdown, setPropsObj, title, setTitle } =
+  const { propsObj, markdown, setMarkdown, setPropsObj, title, setTitle, } =
     useGlobalContext();
     const [index, setIndex] = useState(null)
   const refTitle = useRef(null);
@@ -36,7 +36,7 @@ const Post = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     const length = propsObj.length;
-    tempVAr[index.index] = { name: title, desc: markdown, id: index.id };
+    tempVAr[index.index] = { name: title, desc: markdown, id: index.id, userAddress: localStorage.getItem("address") };
     localStorage.setItem(
       "proposals",
       JSON.stringify(tempVAr)
