@@ -11,10 +11,8 @@ const VoteComponent = ({name, desc, id, children}) => {
   const result = md.render(desc);
   useEffect(() => {
     const childNode =  document.createElement("div")
-    childNode.innerHTML = `<div class="text-bold text-xl">PROPOSAL:</div> \n<div class="bg-blue-300 rounded text-white p-2 mb-4">${result}</div>`;
-
+    childNode.innerHTML = `<div className="text-bold text-xl">PROPOSAL:</div> \n<div className="bg-blue-300 rounded text-white p-2 mb-4">${result}</div>`;
     ref.current.appendChild(childNode)
-    
   }, [])
     if (!id)
    {return <>

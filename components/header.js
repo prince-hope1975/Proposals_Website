@@ -154,7 +154,7 @@ const Header = () => {
         } ${isModalOpen ? styles.modalClosed : ""}`}
       ></div>
       <Link href="/">
-        <a className="text-3xl hover:text-gray-50">Choice Proposals</a>
+        <a className="text-3xl hover:text-blue-400">Choice Proposals</a>
       </Link>
       <div className={`${styles.buttons} `}>
         {!isConnected ? (

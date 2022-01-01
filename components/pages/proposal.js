@@ -8,7 +8,7 @@ const md = new MarkdownIt()
 
 const Proposal = ()=>{
   const router =useRouter()
-    const { propsObj, markdown, setMarkdown, setPropsObj, title,setTitle } = useGlobalContext();
+    const { propsObj, markdown, setMarkdown, setPropsObj, title,setTitle, address } = useGlobalContext();
     const handleSubmit =(e)=>{
         e.preventDefault()
         const length = propsObj.length
@@ -17,7 +17,12 @@ const Proposal = ()=>{
         localStorage.setItem(
           "proposals",
           JSON.stringify([
-            { name: title, desc: markdown, id: Date.now() },
+            {
+              name: title,
+              desc: markdown,
+              id: Date.now(),
+              userAddress: address,
+            },
             ...propsObj,
           ])
         );
@@ -26,11 +31,13 @@ const Proposal = ()=>{
             name: title,
             desc: markdown,
             id: Date.now(),
+            userAddress: address
           },
           ...propsObj,
         ]);
+        
         alert("Successfully created Proposal \nYou can edit You Propsal in the Home or Proposals Page")
-        console.log(title, markdown)
+
         router.push("/")
         
     }

@@ -7,6 +7,7 @@ export const AppProvider = ({ children }) => {
   const [isConnected, setConnected] = useState(false);
   const [markdown, setMarkdown] = useState(null);
   const [title, setTitle] = useState(null)
+  const [address, setAddress] = useState(null);
 
   return (
     <AppContext.Provider
@@ -19,7 +20,10 @@ export const AppProvider = ({ children }) => {
         setConnected,
         markdown,
         setMarkdown,
-        title, setTitle
+        title,
+        setTitle,
+        address,
+        setAddress,
       }}
     >
       {children}

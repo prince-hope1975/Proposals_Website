@@ -17,7 +17,6 @@ const Post = () => {
   let tempVAr = propsObj
 
   useEffect(() => {
-    console.log(propsObj);
     const [currentRouteValues] = propsObj?.filter((props, index) => {
       
    if (props.id == pid) {
@@ -43,7 +42,6 @@ const Post = () => {
       JSON.stringify(tempVAr)
     );
     setPropsObj(tempVAr);
-    console.log(tempVAr)
     alert(
       "Successfully Edited Proposal \nYou can edit more Propsals in the Home or Proposals Page"
     );

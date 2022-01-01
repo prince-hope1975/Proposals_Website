@@ -6,11 +6,10 @@ import Link from "next/link";
 import { useGlobalContext } from "../components/context";
 import Header from "../components/header";
 import { useRouter } from "next/router";
-import {AiOutlineEdit} from "react-icons/ai"
+import { AiOutlineEdit, AiOutlineDelete } from "react-icons/ai";
 
 export default function Home() {
-
-  const { propsObj, setPropsObj } = useGlobalContext();
+  const { propsObj, setPropsObj, setAddress, address } = useGlobalContext();
   const router = useRouter();
 
   useEffect(() => {
@@ -19,9 +18,21 @@ export default function Home() {
       localStorage.setItem("proposals", JSON.stringify(Obj));
       storage = localStorage.getItem("proposals");
     }
-    console.log("Change");
+   
     setPropsObj(JSON.parse(storage));
+    setAddress(localStorage.getItem("address"));
   }, []);
+  const handleDelete = (param)=>{
+    const filteredArray = propsObj?.filter((_, index)=>{
+      return index !== param
+    })
+    const answer = confirm("Are you sure you want to delete this Proposal?")
+    if(answer){
+      setPropsObj(filteredArray)
+      localStorage.setItem("proposals", JSON.stringify(filteredArray))
+      alert("Proposal Deleted Successfully")
+    }
+  }
 
   return (
     <div className={styles.container}>
@@ -53,10 +64,10 @@ export default function Home() {
         </p>
       </main>
       <section className={`m-0 p-0 bg-blue-400 pt-6`}>
-          <div className="text-3xl text-white my-3 text-center">PROPOSALS</div>
+        <div className="text-3xl text-white my-3 text-center">PROPOSALS</div>
         <div className={`bg-blue-400 m-0 p-0 ${styles.grid}`}>
           {propsObj &&
-            propsObj?.map(({ name, desc, id }, key) => {
+            propsObj?.map(({ name, desc, id, userAddress }, key) => {
               return (
                 <details
                   className={`${styles.card} hover:translate-x-3 transition-transform delay-200 ease-in-out shadow-lg`}
@@ -64,16 +75,28 @@ export default function Home() {
                 >
                   <summary className="overflow-hidden">
                     <div className="">{name}</div>
-                    {"  "}#{id}
-                    <div className="flex justify-evenly w-28  ml-auto">
-                      <div
-                        className=" w-screen"
-                        onClick={() => {
-                          router.push(`/edit/${id}`);
-                        }}
-                      >
-                        <AiOutlineEdit className="inline cursor-pointer" />
-                      </div>
+                    {"   "}#{`${id}`?.slice(4, 8)} {"    "}
+                    <div className="grid grid-cols-2 ">
+                      {address && address === userAddress && (
+                        <>
+                          <div
+                            className=" hover:text-slate-900 block"
+                            onClick={() => {
+                              router.push(`/edit/${id}`);
+                            }}
+                          >
+                            <AiOutlineEdit className=" inline cursor-pointer" />
+                          </div>{" "}
+                          <div
+                            onClick={() => {
+                              handleDelete(key)
+                            }}
+                            className=" hover:text-slate-900 cursor-pointer"
+                          >
+                            <AiOutlineDelete />
+                          </div>
+                        </>
+                      )}
                     </div>
                   </summary>
                   <Link href={`/${id}`}>
