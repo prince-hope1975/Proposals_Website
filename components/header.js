@@ -180,17 +180,18 @@ const Header = () => {
                 My Algo Wallwet
               </div>
               <div
-                className=""
+                className="flex"
                 onClick={(e) => handleConnect(e, "Wallet_connect")}
               >
                 <img
+                className="w-8"
                   src="https://i.postimg.cc/J7JZ4cFb/icon-37675b59-1.png"
                   alt=""
                 />{" "}
                 Wallet Connect
               </div>
               <div
-                className=""
+                className="flex"
                 onClick={(e) => handleConnect(e, "Algo_signer")}
               >
                 <img

@@ -31,7 +31,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-        <Header />
+      <Header />
       <main className={` ${styles.main}`}>
         <h1 className={`mt-8 ${styles.title}`}>
           Welcome to <Link href="/new/proposals">Choice Proposals</Link>
@@ -52,7 +52,8 @@ export default function Home() {
           </div>
         </p>
       </main>
-      <section className={`m-0 p-0 `}>
+      <section className={`m-0 p-0 bg-blue-400 pt-6`}>
+          <div class="text-3xl text-white my-3 text-center">PROPOSALS</div>
         <div className={`bg-blue-400 m-0 p-0 ${styles.grid}`}>
           {propsObj &&
             propsObj?.map(({ name, desc, id }, key) => {
@@ -65,7 +66,14 @@ export default function Home() {
                     <div className="">{name}</div>
                     {"  "}#{id}
                     <div class="flex justify-evenly w-28  ml-auto">
-                      <div className=" w-screen"onClick={()=>{router.push(`/edit/${id}`)}}><AiOutlineEdit className="inline cursor-pointer"/></div>
+                      <div
+                        className=" w-screen"
+                        onClick={() => {
+                          router.push(`/edit/${id}`);
+                        }}
+                      >
+                        <AiOutlineEdit className="inline cursor-pointer" />
+                      </div>
                     </div>
                   </summary>
                   <Link href={`/${id}`}>

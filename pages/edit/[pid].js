@@ -72,7 +72,7 @@ const Post = () => {
         </Head>
         <Header/>
       <div className={`${styles.container}`}>
-        <main className={`${styles.main}`}>
+        <main className={`${styles.main} `}>
           <Form {...obj} />
         </main>
       </div>
