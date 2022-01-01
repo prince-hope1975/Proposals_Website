@@ -10,7 +10,10 @@ const VoteComponent = ({name, desc, id, children}) => {
   const ref = useRef(null)
   const result = md.render(desc);
   useEffect(() => {
-    ref?.current.innerHTML = `<div class="text-bold text-xl">PROPOSAL:</div> \n<div class="bg-blue-300 rounded text-white p-2 mb-4">${result}</div>`
+    const childNode =  document.createElement("div")
+    childNode.innerHTML = `<div class="text-bold text-xl">PROPOSAL:</div> \n<div class="bg-blue-300 rounded text-white p-2 mb-4">${result}</div>`;
+
+    ref.current.appendChild(childNode)
     
   }, [])
     if (!id)
@@ -30,7 +33,7 @@ const VoteComponent = ({name, desc, id, children}) => {
             placeholder="Title of Proposal"
             className="bg-gray-100 mb-2 border-gray-500 border-t-2 border-b-2 outline-none px-4 py-2 w-full "
           >
-            <div class="text-bold text-xl">TITLE :</div> {name}
+            <div className="text-bold text-xl">TITLE :</div> {name}
           </div>
           <div
             ref={ref}
@@ -44,7 +47,7 @@ const VoteComponent = ({name, desc, id, children}) => {
             className={` w-full mb-2 border-gray-500 border-t-2 border-b-2 outline-none bg-gray-100 px-3 py-2`}
 
 >
-            <div class="text-bold text-xl mb-3">CAST VOTE:</div>
+            <div className="text-bold text-xl mb-3">CAST VOTE:</div>
             <div className="flex justify-between pb-3">
 <div onClick={()=>setVote(0)} className={`yes ${(vote==0)?"bg-green-500":"bg-green-300"} px-3 py-1 rounded-sm cursor-pointer text-white`}>YES</div>
  <div  onClick={()=>setVote(1)} className={`no ${vote==1?"bg-red-500":"bg-red-300"} px-3 py-1 rounded-sm cursor-pointer text-white`}>NO</div>
