@@ -170,21 +170,20 @@ const Header = () => {
           } `}
         >
           {!isConnected ? (
-            <div className="flex flex-col gap-3">
-             
+            <div className="flex flex-col gap-2 ">
               <div
-                className="flex"
+                className="flex hover:translate-x-3 transition-transform delay-100 bg-white"
                 onClick={(e) => handleConnect(e, "Wallet_connect")}
               >
                 <img
-                className="w-8"
+                  className="w-8"
                   src="https://i.postimg.cc/J7JZ4cFb/icon-37675b59-1.png"
                   alt=""
                 />{" "}
                 Wallet Connect
               </div>
               <div
-                className="flex"
+                className="flex hover:translate-x-3 transition-transform delay-100 bg-white"
                 onClick={(e) => handleConnect(e, "Algo_signer")}
               >
                 <img
