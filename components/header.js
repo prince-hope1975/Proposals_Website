@@ -76,6 +76,8 @@ const Header = () => {
         console.log(error);
       }
     });
+      setConnected(true);
+
   };
   const algoSignerConnect = async () => {
     try {
@@ -169,16 +171,7 @@ const Header = () => {
         >
           {!isConnected ? (
             <div className="flex flex-col gap-3">
-              <div
-                className="flex"
-                onClick={(e) => handleConnect(e, "my_algo_wallet")}
-              >
-                <img
-                  src="https://i.postimg.cc/76r9kXSr/My-Algo-Logo-4c21daa4.png"
-                  alt=""
-                />{" "}
-                My Algo Wallwet
-              </div>
+             
               <div
                 className="flex"
                 onClick={(e) => handleConnect(e, "Wallet_connect")}
